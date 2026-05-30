@@ -390,6 +390,34 @@
         </select>
       </div>
     </div>
+    <div class="grid3" style="margin-bottom:14px;">
+      <div>
+        <label>Posted within</label>
+        <select id="date-range">
+          <option value="7 days">Past 7 days</option>
+          <option value="14 days">Past 14 days</option>
+          <option value="30 days" selected>Past 30 days</option>
+          <option value="90 days">Past 90 days</option>
+        </select>
+      </div>
+      <div>
+        <label>Job type</label>
+        <select id="job-type">
+          <option value="">Any</option>
+          <option value="full-time">Full-time</option>
+          <option value="contract">Contract</option>
+        </select>
+      </div>
+      <div>
+        <label>Remote</label>
+        <select id="remote">
+          <option value="">Any</option>
+          <option value="remote only">Remote only</option>
+          <option value="hybrid">Hybrid</option>
+          <option value="on-site">On-site</option>
+        </select>
+      </div>
+    </div>
     <button class="btn btn-primary" onclick="findJobs()">Find matching jobs →</button>
     <div id="search-status" style="margin-top:10px;"></div>
   </div>
@@ -458,6 +486,9 @@ async function findJobs() {
   const keywords = document.getElementById('keywords').value.trim();
   const location = document.getElementById('location').value.trim();
   const level = document.getElementById('level').value;
+  const dateRange = document.getElementById('date-range').value;
+  const jobType = document.getElementById('job-type').value;
+  const remote = document.getElementById('remote').value;
   const bg = getBg();
 
   if (!keywords) { alert('Please enter job keywords.'); return; }
@@ -471,6 +502,10 @@ async function findJobs() {
 - Keywords: "${keywords}"
 - Location: "${location || 'anywhere / remote'}"
 - Level: "${level || 'any'}"
+- Posted within: "${dateRange}"
+- Job type: "${jobType || 'any'}"
+- Remote preference: "${remote || 'any'}"
+- Important: only suggest roles that are actively hiring right now in ${new Date().getFullYear()}
 
 Candidate background: ${bg}
 
