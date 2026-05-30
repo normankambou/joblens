@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobLens — AI Job Search Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141416;
+    --surface2: #1c1c1f;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --muted: #888;
+    --accent: #7c6af7;
+    --accent2: #5be3a4;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .logo-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-left: 4px;
+  }
+
+  .main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .toggle-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+
+  .toggle-btn:hover { color: var(--text); }
+
+  label {
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  select option { background: var(--surface2); }
+
+  textarea { resize: vertical; line-height: 1.6; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .grid1 { margin-bottom: 14px; }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover { background: var(--surface2); border-color: var(--border2); }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    width: 100%;
+    justify-content: center;
+    padding: 11px 18px;
+  }
+
+  .btn-primary:hover { background: #6a59e8; border-color: #6a59e8; }
+
+  .btn-sm {
+    padding: 5px 11px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .btn-ghost {
+    border-color: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .btn-ghost:hover { color: var(--text); background: var(--surface2); }
+
+  .save-btn-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .saved-msg {
+    font-size: 12px;
+    color: var(--accent2);
+    display: none;
+  }
+
+  .job-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+
+  .job-card:hover { border-color: var(--border2); }
+
+  .job-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+  }
+
+  .job-meta {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .job-meta a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 12px;
+  }
+
+  .job-meta a:hover { text-decoration: underline; }
+
+  .job-reason {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 2px solid var(--accent);
+  }
+
+  .job-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .result-area {
+    margin-top: 14px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+  }
+
+  .score-ring {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    border: 2px solid;
+    flex-shrink: 0;
+  }
+
+  .score-high { border-color: var(--accent2); color: var(--accent2); }
+  .score-mid { border-color: var(--warn); color: var(--warn); }
+  .score-low { border-color: var(--danger); color: var(--danger); }
+
+  .score-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 8px 0;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .err { color: var(--danger); font-size: 13px; padding: 6px 0; }
+
+  .count-line {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+  .empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 600px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .main { padding: 1.25rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Job<span>Lens</span> <span class="logo-sub">ai-powered search</span></div>
+</header>
+
+<div class="main">
+
+  <div class="card" id="setup-card">
+    <div class="card-header">
+      <div class="card-title">⚙ Setup</div>
+      <button class="toggle-btn" onclick="toggleSetup()" id="setup-toggle">−</button>
+    </div>
+    <div id="setup-body">
+      <div class="grid1">
+        <label>Your background — paste resume, skills, experience</label>
+        <textarea id="background" rows="5" placeholder="e.g. Data analyst, 2 years exp, Python/SQL/Tableau, built AWS ETL pipeline on S3+Glue+Athena, Lennar real estate analytics, Boston Partners asset management, Northeastern B.S. Business & Data Science 2024..."></textarea>
+        <div class="hint">The more detail you provide, the better your match scores, outreach messages, and cover letters will be.</div>
+      </div>
+      <div class="save-btn-row">
+        <button class="btn" onclick="saveSetup()" style="width:auto;">Save background</button>
+        <span class="saved-msg" id="saved-msg">✓ Saved</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="margin-bottom:1rem;">
+      <div class="card-title">⌕ Find jobs</div>
+    </div>
+    <div class="grid3">
+      <div>
+        <label>Keywords</label>
+        <input type="text" id="keywords" placeholder="data analyst" />
+      </div>
+      <div>
+        <label>Location</label>
+        <input type="text" id="location" placeholder="Boston MA or Remote" />
+      </div>
+      <div>
+        <label>Level</label>
+        <select id="level">
+          <option value="entry level">Entry level</option>
+          <option value="mid level">Mid level</option>
+          <option value="senior">Senior</option>
+          <option value="">Any level</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="findJobs()">Find matching jobs →</button>
+    <div id="search-status" style="margin-top:10px;"></div>
+  </div>
+
+  <div id="results-section" style="display:none;">
+    <div class="count-line" id="count-line"></div>
+    <div id="results-list"></div>
+  </div>
+
+</div>
+
+<script>
+let jobs = [];
+let setupOpen = true;
+
+function loadSetup() {
+  const bg = localStorage.getItem('jl_background');
+  if (bg) {
+    document.getElementById('background').value = bg;
+    setupOpen = false;
+    document.getElementById('setup-body').style.display = 'none';
+    document.getElementById('setup-toggle').textContent = '+';
+  }
+}
+
+function toggleSetup() {
+  setupOpen = !setupOpen;
+  document.getElementById('setup-body').style.display = setupOpen ? 'block' : 'none';
+  document.getElementById('setup-toggle').textContent = setupOpen ? '−' : '+';
+}
+
+function saveSetup() {
+  const bg = document.getElementById('background').value.trim();
+  if (!bg) { alert('Please enter your background.'); return; }
+  localStorage.setItem('jl_background', bg);
+  const msg = document.getElementById('saved-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  setupOpen = false;
+  document.getElementById('setup-body').style.display = 'none';
+  document.getElementById('setup-toggle').textContent = '+';
+}
+
+function getBg() { return document.getElementById('background').value.trim(); }
+
+async function callClaude(messages, maxTokens) {
+  const resp = await fetch('/api/claude-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens || 1200,
+      messages: messages
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error((err.error && err.error.message) || 'API error ' + resp.status);
+  }
+  const data = await resp.json();
+  if (!data.content || !data.content[0]) throw new Error('Empty response from API');
+  return data.content[0].text;
+}
+
+async function findJobs() {
+  const keywords = document.getElementById('keywords').value.trim();
+  const location = document.getElementById('location').value.trim();
+  const level = document.getElementById('level').value;
+  const bg = getBg();
+
+  if (!keywords) { alert('Please enter job keywords.'); return; }
+  if (!bg) { alert('Please add your background in Setup first.'); return; }
+
+  const status = document.getElementById('search-status');
+  status.innerHTML = '<div class="loading"><div class="spinner"></div> Finding matching opportunities...</div>';
+  document.getElementById('results-section').style.display = 'none';
+
+  const prompt = `You are a job search assistant. Generate 8 specific, realistic job opportunities matching these criteria:
+- Keywords: "${keywords}"
+- Location: "${location || 'anywhere / remote'}"
+- Level: "${level || 'any'}"
+
+Candidate background: ${bg}
+
+For each opportunity:
+1. Choose a real company that genuinely hires for this type of role
+2. Give a realistic job title they would use
+3. Explain in ONE sentence why this is a strong match for this specific candidate
+4. Provide a Google search URL to find the actual posting: https://www.google.com/search?q=COMPANY+JOB+TITLE+jobs+2026
+
+Return ONLY a valid JSON array, no other text:
+[{"title":"","company":"","location":"","match_reason":"","search_url":""}]`;
+
+  try {
+    const text = await callClaude([{ role: 'user', content: prompt }], 1500);
+    const match = text.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('Could not parse job results');
+    jobs = JSON.parse(match[0]).map((j, i) => ({ ...j, id: i }));
+    status.innerHTML = '';
+    renderResults();
+  } catch(e) {
+    status.innerHTML = `<div class="err">Error: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderResults() {
+  const section = document.getElementById('results-section');
+  const list = document.getElementById('results-list');
+  const countLine = document.getElementById('count-line');
+
+  section.style.display = 'block';
+
+  if (!jobs.length) {
+    countLine.textContent = '';
+    list.innerHTML = '<div class="empty">No results found. Try different keywords.</div>';
+    return;
+  }
+
+  countLine.textContent = `${jobs.length} opportunities found`;
+  list.innerHTML = '';
+
+  jobs.forEach(job => {
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    const recruiterUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(job.company + ' recruiter talent acquisition')}`;
+    card.innerHTML = `
+      <div class="job-title">${esc(job.title)}</div>
+      <div class="job-meta">
+        <span>${esc(job.company)}</span>
+        <span>·</span>
+        <span>${esc(job.location)}</span>
+        <a href="${esc(job.search_url)}" target="_blank">↗ Find posting</a>
+        <a href="${recruiterUrl}" target="_blank">↗ Find recruiter</a>
+      </div>
+      <div class="job-reason">${esc(job.match_reason)}</div>
+      <div class="job-actions">
+        <button class="btn btn-sm" onclick="scoreMatch(${job.id})">Match score</button>
+        <button class="btn btn-sm" onclick="genOutreach(${job.id})">Outreach message</button>
+        <button class="btn btn-sm" onclick="tailorResume(${job.id})">Tailor resume</button>
+        <button class="btn btn-sm" onclick="genCoverLetter(${job.id})">Cover letter</button>
+      </div>
+      <div class="result-area" id="r-${job.id}"></div>`;
+    list.appendChild(card);
+  });
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showLoad(id, msg) {
+  const el = document.getElementById('r-' + id);
+  el.style.display = 'block';
+  el.innerHTML = `<div class="loading"><div class="spinner"></div> ${msg || 'Generating...'}`;
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById('r-' + id);
+  el.style.display = 'block';
+  el.innerHTML = `<div class="err">Error: ${esc(msg)}</div>`;
+}
+
+function showText(id, html) {
+  const el = document.getElementById('r-' + id);
+  el.style.display = 'block';
+  el.innerHTML = html;
+}
+
+async function scoreMatch(id) {
+  const job = jobs[id];
+  const bg = getBg();
+  if (!bg) { alert('Add your background in Setup first.'); return; }
+  showLoad(id, 'Scoring match...');
+  try {
+    const text = await callClaude([{ role: 'user', content:
+`Score this candidate's fit for the role from 0-100. Be honest and specific.
+
+Candidate: ${bg}
+
+Role: ${job.title} at ${job.company} (${job.location})
+Why flagged: ${job.match_reason}
+
+Respond in exactly this format:
+SCORE: [number]
+EXPLANATION: [2 sentences covering fit and main gaps]` }]);
+
+    const sm = text.match(/SCORE:\s*(\d+)/);
+    const em = text.match(/EXPLANATION:\s*([\s\S]+)/);
+    const score = sm ? parseInt(sm[1]) : 50;
+    const expl = em ? em[1].trim() : text;
+    const cls = score >= 70 ? 'score-high' : score >= 45 ? 'score-mid' : 'score-low';
+    showText(id, `<div class="score-row"><div class="score-ring ${cls}">${score}</div><div class="score-text">${esc(expl)}</div></div>`);
+  } catch(e) { showErr(id, e.message); }
+}
+
+async function genOutreach(id) {
+  const job = jobs[id];
+  const bg = getBg();
+  if (!bg) { alert('Add your background in Setup first.'); return; }
+  showLoad(id, 'Writing outreach message...');
+  try {
+    const text = await callClaude([{ role: 'user', content:
+`Write a 4-5 sentence LinkedIn outreach message from this candidate to a recruiter at ${job.company} about a ${job.title} role.
+
+Candidate: ${bg}
+
+Be direct and specific — not templated. Reference one genuinely relevant thing from their background. Ask for a conversation not the job. Sound human.
+
+Write only the message body, nothing else.` }]);
+    showText(id, esc(text));
+  } catch(e) { showErr(id, e.message); }
+}
+
+async function tailorResume(id) {
+  const job = jobs[id];
+  const bg = getBg();
+  if (!bg) { alert('Add your background in Setup first.'); return; }
+  showLoad(id, 'Tailoring resume...');
+  try {
+    const text = await callClaude([{ role: 'user', content:
+`You are a resume coach. Given this candidate and role, provide:
+
+1. A tailored 2-sentence resume summary for this specific role
+2. 3 specific bullet point rewrites that use the role's language and requirements
+
+Candidate: ${bg}
+Role: ${job.title} at ${job.company}
+Context: ${job.match_reason}
+
+Be specific. Use the role's exact terminology. Each rewrite should be better than what the candidate has.` }]);
+    showText(id, esc(text));
+  } catch(e) { showErr(id, e.message); }
+}
+
+async function genCoverLetter(id) {
+  const job = jobs[id];
+  const bg = getBg();
+  if (!bg) { alert('Add your background in Setup first.'); return; }
+  showLoad(id, 'Writing cover letter...');
+  try {
+    const text = await callClaude([{ role: 'user', content:
+`Write a compelling cover letter (4 paragraphs max) for this job application.
+
+Candidate: ${bg}
+Role: ${job.title} at ${job.company}
+Context: ${job.match_reason}
+
+Guidelines:
+- Lead with the most relevant and impressive thing about this candidate for this specific role
+- No generic opener like "I am writing to express my interest"
+- Connect their actual experience to the specific role
+- Be direct and confident, not obsequious
+- End with a clear call to action
+- Write only the letter body, no header or date needed` }]);
+    showText(id, esc(text));
+  } catch(e) { showErr(id, e.message); }
+}
+
+loadSetup();
+</script>
+</body>
+</html>
